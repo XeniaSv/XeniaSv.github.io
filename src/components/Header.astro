@@ -1,0 +1,223 @@
+---
+import { site } from '../config/site';
+import { url } from '../lib/url';
+import maxIcon from '../assets/icons/max.svg?raw';
+import telegramIcon from '../assets/icons/telegram.svg?raw';
+import emailIcon from '../assets/icons/email.svg?raw';
+
+const icons: Record<string, string> = { max: maxIcon, telegram: telegramIcon, email: emailIcon };
+const home = url('/');
+---
+
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <nav class="capsule capsule--nav" aria-label="Основная навигация">
+      <button
+        class="burger"
+        type="button"
+        aria-expanded="false"
+        aria-controls="site-nav-links"
+        data-burger
+      >
+        <span class="burger__lines" aria-hidden="true"></span>
+        <span class="sr-only">Меню</span>
+      </button>
+      <ul class="nav-links" id="site-nav-links">
+        {
+          site.nav.map((item) => (
+            <li>
+              <a href={`${home}#${item.hash}`}>{item.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="capsule capsule--social">
+      {
+        site.contacts.map((c) => (
+          <a
+            class="social"
+            href={c.href}
+            aria-label={c.label}
+            target={c.href.startsWith('http') ? '_blank' : undefined}
+            rel={c.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+            set:html={icons[c.id]}
+          />
+        ))
+      }
+    </div>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const burger = header?.querySelector<HTMLButtonElement>('[data-burger]');
+  if (header && burger) {
+    const close = () => {
+      header.classList.remove('is-open');
+      burger.setAttribute('aria-expanded', 'false');
+    };
+    burger.addEventListener('click', () => {
+      const open = header.classList.toggle('is-open');
+      burger.setAttribute('aria-expanded', String(open));
+    });
+    header.querySelectorAll('.nav-links a').forEach((a) => a.addEventListener('click', close));
+    // После прокрутки капсулы становятся плотнее, чтобы текст под ними не мешал читать меню.
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('keydown', (e) => e.key === 'Escape' && close());
+    document.addEventListener('click', (e) => {
+      if (!header.contains(e.target as Node)) close();
+    });
+  }
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: var(--header-top) 0 auto 0;
+    z-index: 50;
+    pointer-events: none;
+  }
+  .site-header__inner {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .capsule {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 24px 32px;
+    border: 1px solid var(--c-border-nav);
+    border-radius: var(--r-pill);
+    background: var(--c-nav-bg);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: background-color 0.25s ease;
+  }
+  .is-scrolled .capsule {
+    background: rgba(255, 255, 255, 0.82);
+  }
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+  .nav-links a:hover {
+    color: var(--c-accent);
+  }
+  .capsule--social {
+    gap: 32px;
+  }
+  .social {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    transition: transform 0.2s ease;
+  }
+  .social:hover {
+    transform: scale(1.12);
+  }
+  .social :global(svg) {
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+  }
+  .burger {
+    display: none;
+    width: 24px;
+    height: 24px;
+    position: relative;
+  }
+  .burger__lines,
+  .burger__lines::before,
+  .burger__lines::after {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--c-ink);
+    content: '';
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease;
+  }
+  .burger__lines {
+    top: 11px;
+  }
+  .burger__lines::before {
+    left: 0;
+    right: 0;
+    top: -6px;
+  }
+  .burger__lines::after {
+    left: 0;
+    right: 0;
+    top: 6px;
+  }
+  .is-open .burger__lines {
+    background: transparent;
+  }
+  .is-open .burger__lines::before {
+    transform: translateY(6px) rotate(45deg);
+  }
+  .is-open .burger__lines::after {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  /* Планшет и меньше: навигация сворачивается в бургер */
+  @media (max-width: 1100px) {
+    .capsule {
+      padding: 20px 24px;
+    }
+    .capsule--social {
+      gap: 24px;
+    }
+    .burger {
+      display: block;
+    }
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      flex-direction: column;
+      gap: 4px;
+      min-width: min(280px, calc(100vw - 2 * var(--gutter)));
+      padding: 12px;
+      border: 1px solid var(--c-border-nav);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.92);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 16px 40px rgba(16, 2, 36, 0.12);
+    }
+    .is-open .nav-links {
+      display: flex;
+    }
+    .nav-links a {
+      display: block;
+      padding: 14px 16px;
+      border-radius: 18px;
+    }
+    .nav-links a:hover {
+      background: var(--c-accent-soft);
+    }
+  }
+</style>

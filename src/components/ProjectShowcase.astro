@@ -1,0 +1,317 @@
+---
+import { Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  title: string;
+  category: string;
+  tag: string;
+  description: string;
+  preview: ImageMetadata;
+  thumbs?: ImageMetadata[];
+  /** Ссылка на страницу проекта. Без неё карточка не кликабельна. */
+  href?: string;
+  /** Зеркальная раскладка: карточка слева, превью справа. */
+  mirrored?: boolean;
+  /** arrow — круглая кнопка; more — «Подробнее»; none — без кнопки. */
+  cta?: 'arrow' | 'more' | 'none';
+  eager?: boolean;
+}
+const {
+  title,
+  category,
+  tag,
+  description,
+  preview,
+  thumbs = [],
+  href,
+  mirrored = false,
+  cta = 'arrow',
+  eager = false,
+} = Astro.props;
+
+const fulls = await Promise.all(
+  thumbs.map((t) => getImage({ src: t, width: 1400, format: 'webp' })),
+);
+const CtaTag = href ? 'a' : 'span';
+const previewProps = {
+  src: preview,
+  alt: '',
+  widths: [640, 1012, 1400],
+  sizes: '(max-width: 1100px) 100vw, 66vw',
+  loading: eager ? ('eager' as const) : ('lazy' as const),
+  class: 'showcase__img',
+  'data-main': true,
+};
+---
+
+<article class:list={['showcase', { 'showcase--mirrored': mirrored }]}>
+  <div class="showcase__media" data-gallery>
+    {
+      href ? (
+        <a href={href} tabindex="-1" aria-hidden="true" class="showcase__media-link">
+          <Image {...previewProps} />
+        </a>
+      ) : (
+        <Image {...previewProps} />
+      )
+    }
+    {
+      thumbs.length > 0 && (
+        <ul class="thumbs" aria-label={`Скриншоты проекта ${title}`}>
+          {thumbs.map((t, i) => (
+            <li>
+              <button
+                type="button"
+                class="thumb"
+                data-full={fulls[i].src}
+                aria-label={`Показать скриншот ${i + 1}`}
+              >
+                <Image src={t} alt="" width={156} height={112} loading="lazy" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+
+  <div class="showcase__card">
+    {
+      cta !== 'none' && (
+        <CtaTag
+          class:list={['cta', `cta--${cta}`, { 'cta--static': !href }]}
+          href={href}
+          aria-label={href ? `Открыть проект: ${title}` : undefined}
+          aria-hidden={href ? undefined : 'true'}
+        >
+          <span class="cta__circle">
+            <Icon name={cta === 'more' ? 'arrow-up-right' : 'arrow-right'} />
+          </span>
+          {cta === 'more' && <span class="cta__label">Подробнее</span>}
+        </CtaTag>
+      )
+    }
+    <div class="info">
+      <div class="meta">
+        <span class="meta__cat">{category}</span>
+        <span class="meta__dot" aria-hidden="true"></span>
+        <span class="meta__tag">{tag}</span>
+      </div>
+      <h3 class="info__title">
+        {href ? <a href={href}>{title}</a> : title}
+      </h3>
+      <p class="info__desc">{description}</p>
+    </div>
+  </div>
+</article>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((gallery) => {
+    const main = gallery.querySelector<HTMLImageElement>('[data-main]');
+    const buttons = Array.from(gallery.querySelectorAll<HTMLButtonElement>('.thumb'));
+    if (!main) return;
+    buttons.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const full = btn.dataset.full;
+        if (!full) return;
+        main.removeAttribute('srcset');
+        main.removeAttribute('sizes');
+        main.src = full;
+        buttons.forEach((b) => b.removeAttribute('aria-current'));
+        btn.setAttribute('aria-current', 'true');
+      }),
+    );
+  });
+</script>
+
+<style>
+  .showcase {
+    display: grid;
+    grid-template-columns: minmax(0, 1012fr) minmax(0, 496fr);
+    align-items: stretch;
+    gap: 20px;
+  }
+  .showcase--mirrored {
+    grid-template-columns: minmax(0, 496fr) minmax(0, 1012fr);
+  }
+  .showcase--mirrored .showcase__media {
+    order: 2;
+  }
+  .showcase--mirrored .showcase__card {
+    order: 1;
+  }
+
+  /* Превью */
+  .showcase__media {
+    position: relative;
+    aspect-ratio: 1012 / 534;
+    border-radius: var(--r-preview);
+    overflow: hidden;
+    background: #eee9fb;
+  }
+  .showcase__media-link {
+    display: block;
+    height: 100%;
+  }
+  .showcase__media :global(.showcase__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .thumbs {
+    position: absolute;
+    right: 2.7%;
+    bottom: 4.3%;
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .thumb {
+    display: block;
+    width: clamp(48px, 4.5vw, 78px);
+    aspect-ratio: 78 / 56;
+    border: 1px solid var(--c-border-thumb);
+    border-radius: var(--r-thumb);
+    overflow: hidden;
+    background: #fff;
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .thumb :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .thumb:hover,
+  .thumb[aria-current='true'] {
+    border-color: var(--c-accent);
+    transform: translateY(-2px);
+  }
+
+  /* Карточка */
+  .showcase__card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    padding-inline-start: 24px;
+    min-height: 100%;
+    border-radius: var(--r-card);
+  }
+  .showcase--mirrored .showcase__card {
+    align-items: flex-start;
+    padding-inline-start: 0;
+    padding-inline-end: 24px;
+  }
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--c-accent);
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .cta__circle {
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    border-radius: var(--r-pill);
+    background: var(--c-accent);
+    color: #fff;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  a.cta:hover .cta__circle {
+    transform: translateX(4px);
+    box-shadow: var(--shadow-btn);
+  }
+  .cta--static {
+    cursor: default;
+  }
+  .info {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    margin-block-start: auto;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    color: var(--c-accent);
+    font-size: var(--fs-caption);
+    font-weight: 600;
+  }
+  .meta__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--c-accent);
+  }
+  .meta__tag {
+    padding: 12px 24px;
+    border-radius: 100px;
+    background: var(--c-accent-soft);
+    text-transform: uppercase;
+    line-height: normal;
+  }
+  .info__title {
+    font-size: var(--fs-card-title);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+  }
+  .info__title a:hover {
+    color: var(--c-accent);
+  }
+  .info__desc {
+    color: var(--c-text-2);
+    font-size: var(--fs-lead);
+    line-height: 1.2;
+    letter-spacing: -0.04em;
+  }
+
+  /* Планшет/мобильный: колонка — превью сверху, карточка ниже */
+  @media (max-width: 1100px) {
+    .showcase,
+    .showcase--mirrored {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+    }
+    .showcase--mirrored .showcase__media {
+      order: 0;
+    }
+    .showcase--mirrored .showcase__card {
+      order: 1;
+    }
+    .showcase__card,
+    .showcase--mirrored .showcase__card {
+      align-items: flex-start;
+      flex-direction: column-reverse;
+      padding-inline: 0;
+      gap: 24px;
+    }
+    .cta__circle {
+      width: 60px;
+      height: 60px;
+    }
+  }
+  @media (max-width: 767px) {
+    .meta__tag {
+      padding: 10px 18px;
+    }
+    .thumbs {
+      gap: 6px;
+    }
+  }
+</style>

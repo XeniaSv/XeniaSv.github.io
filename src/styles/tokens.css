@@ -1,0 +1,47 @@
+/* Дизайн-токены, снятые с макетов Figma (см. docs/DESIGN_TOKENS.md). */
+:root {
+  /* Цвета */
+  --c-ink: #100224;
+  --c-text-2: #635a6f;
+  --c-accent: #8a5cf6;
+  --c-accent-soft: rgba(138, 92, 246, 0.13);
+  --c-accent-faint: rgba(138, 92, 246, 0.2);
+  --c-hero-top: #e7defd;
+  --c-white: #fff;
+  --c-border-thumb: #e5e7eb;
+  --c-border-nav: #f3f4f6;
+  --c-nav-bg: rgba(250, 250, 250, 0.3);
+
+  /* Типографика */
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Шкала шрифтов: min / fluid / max (макет 1728px) */
+  --fs-hero: clamp(2.25rem, 5.56vw, 6rem); /* 96 */
+  --fs-hero-sub: clamp(1.375rem, 2.08vw, 2.25rem); /* 36 */
+  --fs-h1: clamp(1.75rem, 2.78vw, 3rem); /* 48 */
+  --fs-card-title: clamp(2rem, 2.78vw, 3rem); /* 48 */
+  --fs-lead: clamp(1rem, 1.16vw, 1.25rem); /* 20 */
+  --fs-h2: clamp(1.25rem, 1.39vw, 1.5rem); /* 24 */
+  --fs-body: 1rem; /* 16 */
+  --fs-small: 0.875rem; /* 14 */
+  --fs-caption: 0.75rem; /* 12 */
+
+  /* Радиусы */
+  --r-pill: 60px;
+  --r-card: 20px;
+  --r-preview: 12px;
+  --r-lead: 32px;
+  --r-thumb: 6px;
+
+  /* Отступы */
+  --gutter: clamp(20px, 5.8vw, 100px);
+  --container: 1528px;
+  --space-section: clamp(96px, 11.6vw, 200px);
+  --space-section-head: clamp(40px, 5.8vw, 100px);
+
+  /* Тени кнопок */
+  --shadow-btn: 0 12px 12px rgba(138, 92, 246, 0.25);
+  --shadow-btn-soft: 0 12px 12px rgba(138, 92, 246, 0.06);
+
+  --header-top: clamp(16px, 3.47vw, 60px);
+}

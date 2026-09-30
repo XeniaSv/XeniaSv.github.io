@@ -1,0 +1,43 @@
+---
+/** Подпись секции главной: «/ Название». */
+interface Props {
+  id: string;
+  label: string;
+  align?: 'start' | 'end';
+}
+const { id, label, align = 'start' } = Astro.props;
+---
+
+<h2 class:list={['section-label', `section-label--${align}`]} id={id}>
+  <span class="section-label__slash" aria-hidden="true">/</span>
+  <span class="section-label__text">{label}</span>
+</h2>
+
+<style>
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    line-height: 1.1;
+    font-weight: 400;
+    opacity: 0.6;
+  }
+  .section-label--end {
+    justify-content: flex-end;
+  }
+  .section-label__slash {
+    color: var(--c-accent);
+    font-size: clamp(1.75rem, 2.08vw, 2.25rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+  }
+  .section-label__text {
+    font-size: var(--fs-lead);
+    letter-spacing: -0.04em;
+  }
+  @media (max-width: 1100px) {
+    .section-label--end {
+      justify-content: flex-start;
+    }
+  }
+</style>

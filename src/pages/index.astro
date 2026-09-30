@@ -1,0 +1,210 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+import ProjectShowcase from '../components/ProjectShowcase.astro';
+import ScrollTop from '../components/ScrollTop.astro';
+import { site } from '../config/site';
+import { homeSections } from '../data/home';
+import { url } from '../lib/url';
+import HeroBackground from '../components/HeroBackground.astro';
+
+const projects = await getCollection('projects');
+const bySlug = new Map(projects.map((p) => [p.id, p]));
+
+/** Превращает запись из data/home.ts в props для ProjectShowcase. */
+const sections = homeSections.map((section) => ({
+  ...section,
+  cards: section.cards.map((card) => {
+    if (!card.project) return card;
+    const entry = bySlug.get(card.project);
+    if (!entry) throw new Error(`home.ts: проект «${card.project}» не найден в src/content/projects`);
+    const d = entry.data;
+    return {
+      ...card,
+      title: card.title ?? d.cardTitle ?? d.shortTitle ?? d.title.replace(/\n/g, ' '),
+      category: card.category ?? d.category,
+      tag: card.tag ?? d.tag,
+      description: card.description ?? d.description,
+      preview: card.preview ?? d.preview,
+      thumbs: card.thumbs ?? d.thumbs,
+      href: url(`/projects/${entry.id}/`),
+    };
+  }),
+}));
+---
+
+<BaseLayout>
+  <main>
+    <section class="hero bg-hero">
+      <HeroBackground />
+      <div class="container hero__inner">
+        <h1 class="hero__name">
+          {site.nameLines.map((line) => <span>{line}</span>)}
+        </h1>
+        <div class="hero__bottom">
+          <div class="hero__titles">
+            <p class="hero__sub">
+              {site.hero.subtitle.map((line) => <span>{line}</span>)}
+            </p>
+            <p class="hero__desc">{site.hero.description}</p>
+          </div>
+          <div class="hero__cta">
+            <Button href={site.hero.primaryCta.href}>{site.hero.primaryCta.label}</Button>
+            <Button href={url(site.hero.secondaryCta.href)} variant="secondary" download>
+              {site.hero.secondaryCta.label}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="projects container">
+      {
+        sections.map((section, sIdx) => (
+          <section class="group" aria-labelledby={section.id}>
+            <SectionLabel id={section.id} label={section.label} align={section.labelAlign} />
+            <div class="group__cards">
+              {section.cards.map((card, cIdx) => (
+                <ProjectShowcase
+                  title={card.title!}
+                  category={card.category!}
+                  tag={card.tag!}
+                  description={card.description!}
+                  preview={card.preview!}
+                  thumbs={card.thumbs}
+                  href={'href' in card ? (card.href as string) : undefined}
+                  mirrored={card.mirrored}
+                  cta={card.cta}
+                  eager={sIdx === 0 && cIdx === 0}
+                />
+              ))}
+            </div>
+          </section>
+        ))
+      }
+    </div>
+
+    <div class="tail bg-end">
+      <div class="container">
+        <ScrollTop />
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .hero {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: clamp(640px, 64.6vw, 1117px);
+    padding-block: 140px clamp(48px, 5.8vw, 100px);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero__inner {
+    position: relative; /* поверх фона (HeroBackground) */
+    display: flex;
+    flex-direction: column;
+    gap: clamp(32px, 3.47vw, 60px);
+  }
+  .hero__name {
+    display: flex;
+    flex-direction: column;
+    font-size: var(--fs-hero);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .hero__bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 40px;
+  }
+  .hero__titles {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 881px;
+  }
+  .hero__sub {
+    display: flex;
+    flex-direction: column;
+    color: var(--c-accent);
+    font-size: var(--fs-hero-sub);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+  .hero__desc {
+    font-size: var(--fs-lead);
+    line-height: 1.2;
+    letter-spacing: -0.04em;
+  }
+  .hero__cta {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 0 0 min(365px, 100%);
+    margin-bottom: -4px;
+  }
+  .hero__cta :global(.btn) {
+    width: 100%;
+  }
+
+  /* Проекты */
+  .projects {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-section);
+    padding-block: var(--space-section-head) 0;
+  }
+  .group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-section-head);
+  }
+  .group__cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-section);
+  }
+
+  /* Нижний блок с кнопкой «наверх» */
+  .tail {
+    margin-top: calc(var(--space-section) * 0.75);
+    padding-block: clamp(120px, 20vw, 340px) clamp(32px, 4.6vw, 80px);
+  }
+
+  @media (max-width: 1100px) {
+    .hero__bottom {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .hero__cta {
+      flex-basis: auto;
+      max-width: 440px;
+    }
+    .group__cards {
+      gap: 72px;
+    }
+  }
+  @media (max-width: 767px) {
+    .hero {
+      padding-top: 120px;
+      align-items: flex-end;
+    }
+    .hero__cta {
+      max-width: none;
+    }
+    .projects {
+      gap: 96px;
+    }
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+/** Пилюля-кнопка из макета. Без href рендерится как <button>. */
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary';
+  class?: string;
+  download?: boolean;
+}
+const { href, variant = 'primary', class: className, download, ...rest } = Astro.props;
+const Tag = href ? 'a' : 'button';
+---
+
+<Tag
+  class:list={['btn', `btn--${variant}`, className]}
+  href={href}
+  download={download ? '' : undefined}
+  type={href ? undefined : 'button'}
+  {...rest}
+>
+  <slot />
+</Tag>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    border-radius: var(--r-pill);
+    font-size: var(--fs-lead);
+    font-weight: 600;
+    line-height: normal;
+    white-space: nowrap;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background-color 0.2s ease;
+  }
+  .btn--primary {
+    background: var(--c-accent);
+    color: #fff;
+    box-shadow: var(--shadow-btn);
+  }
+  .btn--secondary {
+    background: #fff;
+    color: var(--c-accent);
+    box-shadow: var(--shadow-btn-soft);
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+  .btn--primary:hover {
+    box-shadow: 0 16px 20px rgba(138, 92, 246, 0.35);
+  }
+  .btn:active {
+    transform: translateY(0);
+  }
+  @media (max-width: 767px) {
+    .btn {
+      padding: 20px;
+    }
+  }
+</style>

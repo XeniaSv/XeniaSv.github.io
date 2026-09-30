@@ -1,0 +1,139 @@
+---
+/**
+ * Анимированная «клякса» в hero — повтор видео-заливки из Figma (2604146_Backgrounds_Abstract_1280x720,
+ * 10 с, blend = color-burn) без <video>: покадровая CSS-анимация по спрайту.
+ *
+ * Спрайт `hero-blob-sprite.webp` — 120 кадров (15 к/с, сетка 12×10) из ролика, обрезанных по
+ * рамке блоба (356,76 · 584×558 в координатах видео 1280×720). Серый фон ролика (#e3e3e3)
+ * вырезан в прозрачность и возвращён слоем `::before` с тем же цветом и тем же blend — итоговый цвет
+ * такой же, как в Figma.
+ *
+ * Зацикливание: ролик не зациклен (начинается бугристой формой, заканчивается гладкой), поэтому
+ * петля длится 8 с, а хвост ролика (8–10 с) плавно растворён в его начало (0–2 с) прямо в спрайте.
+ * Последний кадр петли переходит в первый без скачка.
+ *
+ * Плавность: `steps()` даёт только 15 к/с, поэтому кадры «дорисовываются» — поверх текущего кадра
+ * лежит следующий (то же спрайт, сдвиг на 1 кадр) с линейно нарастающей за шаг прозрачностью.
+ * Оба кадра собраны в группу, и `color-burn` применяется к группе целиком (не к каждому кадру отдельно).
+ *
+ * Геометрия из макета (hero 1728×1117): слой 2600×1462 (масштаб 2,0317 к видео), центр кадра в
+ * (79,17% − 84 px ; 50% + 19 px), поворот 0,23°. Единица `--k` = px на 1 px видео; на ширине 1728 это 2,0317.
+ *
+ * При prefers-reduced-motion — статичный первый кадр.
+ * Как пересобрать спрайт: docs/HERO_BLOB.md.
+ */
+import sprite from '../assets/bg/hero-blob-sprite.webp';
+---
+
+<div class="hero-bg" aria-hidden="true" style={`--sprite: url("${sprite.src}")`}>
+  <span class="hero-bg__blob">
+    <span class="hero-bg__frame hero-bg__frame--cur"></span>
+    <span class="hero-bg__frame hero-bg__frame--next"></span>
+  </span>
+</div>
+
+<style>
+  .hero-bg {
+    --k: max(0.11757vw, 0.9px); /* px CSS на 1 px видео (2,0317 при ширине 1728) */
+    --cols: 12;
+    --rows: 10;
+    --cw: calc(584 * var(--k)); /* ширина кадра спрайта в CSS px */
+    --ch: calc(558 * var(--k));
+    --ax: 74.32%; /* центр видео-кадра в hero: 79,17% − 84 px ≈ 74,3% ширины */
+    --ay: 33.43vw; /* 50% + 19 px от высоты 1117 ≈ 33,4vw */
+    --frame: calc(0.8s / 12); /* длительность одного кадра: 1 / 15 к/с */
+
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    /* без z-index: иначе wrapper станет stacking context и blend не увидит градиент hero */
+  }
+
+  /* Серый фон ролика (#e3e3e3) с тем же color-burn, что у видео в Figma. */
+  .hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #e3e3e3;
+    mix-blend-mode: color-burn;
+  }
+
+  .hero-bg__blob {
+    position: absolute;
+    /* левый верх обрезанной рамки: центр видео (640,360) минус смещение обрезки (356,76) */
+    left: calc(var(--ax) - 284 * var(--k));
+    top: calc(var(--ay) - 284 * var(--k));
+    width: var(--cw);
+    height: var(--ch);
+    isolation: isolate; /* кадры смешиваются друг с другом, а не с фоном */
+    mix-blend-mode: color-burn;
+    transform: rotate(0.23deg);
+    transform-origin: calc(284 * var(--k)) calc(284 * var(--k));
+  }
+
+  .hero-bg__frame {
+    position: absolute;
+    inset: 0;
+    background-image: var(--sprite);
+    background-repeat: no-repeat;
+    background-size: calc(var(--cols) * var(--cw)) calc(var(--rows) * var(--ch));
+    background-position: 0 0;
+  }
+
+  /* 120 кадров за 8 с: строка (12 кадров) — 0,8 с, всего 10 строк. */
+  .hero-bg__frame--cur {
+    animation:
+      blob-x 0.8s steps(12) infinite,
+      blob-y 8s steps(10) infinite;
+  }
+  /* Следующий кадр: те же анимации, но на 1 кадр вперёд (отрицательный delay) + нарастающая прозрачность. */
+  .hero-bg__frame--next {
+    animation:
+      blob-x 0.8s steps(12) calc(var(--frame) * -1) infinite,
+      blob-y 8s steps(10) calc(var(--frame) * -1) infinite,
+      blob-mix var(--frame) linear infinite;
+  }
+
+  @keyframes blob-x {
+    from {
+      background-position-x: 0;
+    }
+    to {
+      background-position-x: calc(var(--cols) * var(--cw) * -1);
+    }
+  }
+  @keyframes blob-y {
+    from {
+      background-position-y: 0;
+    }
+    to {
+      background-position-y: calc(var(--rows) * var(--ch) * -1);
+    }
+  }
+  @keyframes blob-mix {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-bg__frame--cur {
+      animation: none;
+    }
+    .hero-bg__frame--next {
+      display: none;
+    }
+  }
+
+  /* Мобильный: блоб не масштабируется ниже 0,9 px на px видео и сдвигается, чтобы оставаться в кадре */
+  @media (max-width: 767px) {
+    .hero-bg {
+      --ax: 66%;
+      --ay: 300px;
+    }
+  }
+</style>

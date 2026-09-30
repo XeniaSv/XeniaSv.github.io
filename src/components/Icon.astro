@@ -1,0 +1,29 @@
+---
+/** Инлайн-иконки (stroke = currentColor), заменяют SVG-экспорты Figma. */
+interface Props {
+  name: 'arrow-right' | 'arrow-up' | 'arrow-up-right';
+  size?: number;
+}
+const { name, size = 24 } = Astro.props;
+const paths: Record<Props['name'], string> = {
+  'arrow-right': 'M20.4853 12.0001H3.51472M13.4142 4.92898L20.4853 12.0001L13.4142 19.0711',
+  'arrow-up': 'M12 3.51472V20.4853M4.92893 10.5858L12 3.51472L19.0711 10.5858',
+  'arrow-up-right': 'M18 6L6 18M8 6H18V16',
+};
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path
+    d={paths[name]}
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"></path>
+</svg>

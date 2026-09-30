@@ -1,0 +1,33 @@
+---
+import Button from './Button.astro';
+import ScrollTop from './ScrollTop.astro';
+import { url } from '../lib/url';
+---
+
+<div class="back-bar container">
+  <Button href={url('/')} class="back-bar__btn">Вернуться на Главную</Button>
+  <ScrollTop class="back-bar__top" />
+</div>
+
+<style>
+  .back-bar {
+    display: flex;
+    align-items: center;
+    gap: clamp(16px, 2.72vw, 47px);
+  }
+  .back-bar :global(.back-bar__btn) {
+    flex: 0 0 min(365px, 100%);
+  }
+  .back-bar :global(.back-bar__top) {
+    flex: 1;
+  }
+  @media (max-width: 767px) {
+    .back-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .back-bar :global(.back-bar__btn) {
+      flex: none;
+    }
+  }
+</style>

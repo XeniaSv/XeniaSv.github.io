@@ -1,0 +1,45 @@
+---
+import { getCollection, render } from 'astro:content';
+import ProjectLayout from '../../layouts/ProjectLayout.astro';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  return projects.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry, all: projects },
+  }));
+}
+
+const { entry, all } = Astro.props;
+const { Content, headings } = await render(entry);
+const d = entry.data;
+const shortTitle = d.shortTitle ?? d.title.replace(/\n/g, ' ');
+
+// Блок «Другие проекты»: явный список related, иначе — все остальные проекты.
+const relatedIds = d.related.length ? d.related : all.map((p) => p.id).filter((id) => id !== entry.id);
+const related = relatedIds
+  .map((id) => all.find((p) => p.id === id))
+  .filter((p): p is NonNullable<typeof p> => !!p && p.id !== entry.id)
+  .map((p) => ({
+    href: url(`/projects/${p.id}/`),
+    title: p.data.cardTitle ?? p.data.shortTitle ?? p.data.title.replace(/\n/g, ' '),
+    tag: p.data.tag,
+    preview: p.data.preview,
+  }));
+
+const toc = headings.filter((h) => h.depth === 2).map((h) => ({ slug: h.slug, text: h.text }));
+---
+
+<ProjectLayout
+  title={d.title}
+  shortTitle={shortTitle}
+  description={d.description}
+  lead={d.lead}
+  leadCrop={d.leadCrop}
+  leadLogo={d.leadLogo}
+  toc={toc}
+  related={related}
+>
+  <Content />
+</ProjectLayout>
