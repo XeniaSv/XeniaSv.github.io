@@ -50,7 +50,9 @@ docs/                     ADD_PROJECT.md, DESIGN_TOKENS.md, TODO.md
 
 Сайт настроен как **пользовательский** (`https://<user>.github.io/`, корневой путь).
 
-1. Репозиторий должен называться `<user>.github.io` (для пользовательского сайта). Сейчас репозиторий называется `portfolio` — либо переименуйте его, либо используйте вариант «проектный сайт» ниже.
+> **Репозиторий переименован:** `XeniaSv/portfolio` → [`XeniaSv/XeniaSv.github.io`](https://github.com/XeniaSv/XeniaSv.github.io) (нужно для пользовательского сайта). Адрес сайта — `https://xeniasv.github.io/`. Remote обновлён: `git remote set-url origin https://github.com/XeniaSv/XeniaSv.github.io.git` (старый адрес GitHub перенаправляет, но лучше использовать новый). Локальная папка может называться как угодно.
+
+1. Репозиторий должен называться `<user>.github.io` (для пользовательского сайта) — уже сделано, см. выше.
 2. Settings → Pages → Source: **GitHub Actions**.
 3. Push в `main` запускает `.github/workflows/deploy.yml` (сборка → проверка ссылок → публикация).
 

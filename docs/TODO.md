@@ -44,8 +44,8 @@
 
 ## Публикация
 
-- [ ] Репозиторий называется `portfolio`; для пользовательского сайта нужен `<user>.github.io` (или вариант проектного сайта, см. README → «Деплой»)
-- [ ] Settings → Pages → Source: GitHub Actions
+- [x] Репозиторий переименован `portfolio` → `XeniaSv.github.io` (сайт в корне: `https://xeniasv.github.io/`, `BASE_PATH` не нужен); `origin` обновлён
+- [x] Settings → Pages → Source: GitHub Actions
 - [ ] `SITE_URL` в `astro.config.mjs`/workflow — реальный домен (если кастомный)
 - [ ] Favicon (`public/favicon.svg`) — временный, заменить
 - [ ] OG-картинка для превью в соцсетях (сейчас нет)

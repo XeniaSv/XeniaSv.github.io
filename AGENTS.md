@@ -6,6 +6,12 @@
 
 Статический портфолио-сайт (Astro 7 + MDX + чистый CSS), деплой на GitHub Pages. Дизайн — Figma `KkKl7hBIxrS5pe477oRo65` (файл «Portfolio»). Язык интерфейса и текстов — русский.
 
+## Репозиторий и деплой
+
+- GitHub: `XeniaSv/XeniaSv.github.io` (переименован из `portfolio`; `origin` указывает на новый адрес). Локальная папка проекта может называться `portfolio` — это нормально.
+- Пользовательский сайт GitHub Pages: `https://xeniasv.github.io/`, корневой путь → `base` не нужен. Публикация — GitHub Actions (`.github/workflows/deploy.yml`) при пуше в `main`; в Settings → Pages источник — **GitHub Actions**.
+- Пушить в `main` только по явной просьбе пользователя.
+
 ## Команды
 
 Node.js ≥ 22.12 (на Windows после установки может потребоваться перезапуск шелла, чтобы `node` появился в PATH).
