@@ -49,4 +49,4 @@
 - [x] Settings → Pages → Source: GitHub Actions
 - [ ] `SITE_URL` в `astro.config.mjs`/workflow — реальный домен (если кастомный)
 - [x] Favicon — круг с монограммой «НК» (`public/favicon.svg` + PNG 48/192 и apple-touch-icon, сделаны по присланной картинке)
-- [ ] OG-картинка для превью в соцсетях (сейчас нет)
+- [x] OG-картинка для репостов — `public/og-image.jpg` (1200×630, из присланного макета), подключена в `<head>` (og:image, twitter:card)
