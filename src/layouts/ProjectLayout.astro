@@ -150,7 +150,7 @@ const { title, shortTitle, description, lead, leadCrop, leadLogo, toc, related }
   /* Тело статьи + оглавление */
   .article {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 498px);
+    grid-template-columns: minmax(0, 1fr) clamp(240px, 20vw, 340px);
     column-gap: clamp(32px, 3.5vw, 60px);
     align-items: start;
     padding-top: clamp(48px, 4.4vw, 76px);

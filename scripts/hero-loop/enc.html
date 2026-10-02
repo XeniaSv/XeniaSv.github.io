@@ -1,0 +1,98 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Сборка бесшовной петли hero</title>
+<body style="margin: 0; font: 14px system-ui">
+  <p style="margin: 8px">
+    Консоль: <code>await run()</code> — соберёт <code>src/assets/bg/hero-blob-loop.mp4</code>,
+    <code>await poster()</code> — постер <code>hero-blob-poster.png</code> (затем сконвертируйте в webp).
+  </p>
+  <canvas id="c" width="1280" height="720" style="width: 640px"></canvas>
+  <script type="module">
+    // Требуется Chromium с WebCodecs. Перед запуском: npm i --no-save mp4-muxer
+    import { Muxer, ArrayBufferTarget } from '/node_modules/mp4-muxer/build/mp4-muxer.mjs';
+
+    const W = 1280, H = 720, FPS = 30;
+
+    const load = (src) =>
+      new Promise((resolve, reject) => {
+        const v = document.createElement('video');
+        v.muted = true;
+        v.preload = 'auto';
+        v.crossOrigin = 'anonymous';
+        v.src = src;
+        v.onloadeddata = () => resolve(v);
+        v.onerror = () => reject(new Error('не удалось загрузить ' + src));
+      });
+    const seek = (v, t) =>
+      new Promise((resolve) => {
+        const done = () => {
+          v.removeEventListener('seeked', done);
+          resolve();
+        };
+        v.addEventListener('seeked', done);
+        v.currentTime = t;
+      });
+    const save = async (name, body) => (await fetch('/save/' + name, { method: 'POST', body })).text();
+
+    /**
+     * Кадр i (t = i / FPS): при t < xfade — video(t + loop) снизу и video(t) сверху с alpha = t / xfade,
+     * иначе video(t). Последний кадр петли переходит в первый без скачка.
+     */
+    window.run = async ({ loopSec = 8, xfadeSec = 2, bitrate = 3.5e6 } = {}) => {
+      const v = await load('/src.mp4');
+      const canvas = document.getElementById('c');
+      const ctx = canvas.getContext('2d', { colorSpace: 'srgb' });
+      const tmp = document.createElement('canvas');
+      tmp.width = W;
+      tmp.height = H;
+      const tctx = tmp.getContext('2d', { colorSpace: 'srgb' });
+
+      const target = new ArrayBufferTarget();
+      const muxer = new Muxer({ target, video: { codec: 'avc', width: W, height: H, frameRate: FPS }, fastStart: 'in-memory' });
+      const enc = new VideoEncoder({ output: (c, m) => muxer.addVideoChunk(c, m), error: (e) => console.error(e) });
+      enc.configure({ codec: 'avc1.640028', width: W, height: H, bitrate, framerate: FPS, latencyMode: 'quality' });
+
+      const at = (idx) => (idx + 0.5) / FPS; // середина кадра исходника
+      const frames = loopSec * FPS;
+      for (let i = 0; i < frames; i++) {
+        const t = i / FPS;
+        if (t < xfadeSec) {
+          await seek(v, at(i + loopSec * FPS));
+          ctx.globalAlpha = 1;
+          ctx.drawImage(v, 0, 0, W, H);
+          await seek(v, at(i));
+          tctx.clearRect(0, 0, W, H);
+          tctx.drawImage(v, 0, 0, W, H);
+          ctx.globalAlpha = Math.min(1, t / xfadeSec);
+          ctx.drawImage(tmp, 0, 0);
+          ctx.globalAlpha = 1;
+        } else {
+          await seek(v, at(i));
+          ctx.globalAlpha = 1;
+          ctx.drawImage(v, 0, 0, W, H);
+        }
+        while (enc.encodeQueueSize > 8) await new Promise((r) => setTimeout(r, 5));
+        const frame = new VideoFrame(canvas, { timestamp: Math.round((i * 1e6) / FPS), duration: Math.round(1e6 / FPS) });
+        enc.encode(frame, { keyFrame: i % 60 === 0 });
+        frame.close();
+        if (i % 20 === 0) console.log(`кадр ${i}/${frames}`);
+      }
+      await enc.flush();
+      enc.close();
+      muxer.finalize();
+      return save('hero-blob-loop.mp4', target.buffer);
+    };
+
+    // постер = первый кадр собранной петли
+    window.poster = async () => {
+      const v = await load('/src/assets/bg/hero-blob-loop.mp4');
+      await seek(v, 0.5 / FPS);
+      const c = document.createElement('canvas');
+      c.width = W;
+      c.height = H;
+      c.getContext('2d').drawImage(v, 0, 0);
+      const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+      return save('hero-blob-poster.png', blob);
+    };
+  </script>
+</body>

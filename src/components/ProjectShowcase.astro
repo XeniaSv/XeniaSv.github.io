@@ -10,12 +10,18 @@ interface Props {
   description: string;
   preview: ImageMetadata;
   thumbs?: ImageMetadata[];
-  /** Ссылка на страницу проекта. Без неё карточка не кликабельна. */
+  /** Ссылка на страницу проекта или внешний сайт. Без неё карточка не кликабельна. */
   href?: string;
+  /** Внешняя ссылка: открывается в новой вкладке. */
+  external?: boolean;
+  /** Надпись, выезжающая у кнопки при наведении («Перейти на сайт»); она же входит в aria-label ссылки. */
+  ctaText?: string;
+  /** object-position превью, если важную часть кадра обрезает рамка 1012×534. */
+  previewPosition?: string;
   /** Зеркальная раскладка: карточка слева, превью справа. */
   mirrored?: boolean;
-  /** arrow — круглая кнопка; more — «Подробнее»; none — без кнопки. */
-  cta?: 'arrow' | 'more' | 'none';
+  /** arrow — круглая кнопка с выезжающей надписью; none — без кнопки. */
+  cta?: 'arrow' | 'none';
   eager?: boolean;
 }
 const {
@@ -26,6 +32,9 @@ const {
   preview,
   thumbs = [],
   href,
+  external = false,
+  ctaText = 'Перейти к кейсу',
+  previewPosition,
   mirrored = false,
   cta = 'arrow',
   eager = false,
@@ -35,6 +44,8 @@ const fulls = await Promise.all(
   thumbs.map((t) => getImage({ src: t, width: 1400, format: 'webp' })),
 );
 const CtaTag = href ? 'a' : 'span';
+const linkProps = href && external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+const ctaLabel = href ? `${ctaText}: ${title}${external ? ' (откроется в новой вкладке)' : ''}` : undefined;
 const previewProps = {
   src: preview,
   alt: '',
@@ -47,16 +58,12 @@ const previewProps = {
 ---
 
 <article class:list={['showcase', { 'showcase--mirrored': mirrored }]}>
-  <div class="showcase__media" data-gallery>
-    {
-      href ? (
-        <a href={href} tabindex="-1" aria-hidden="true" class="showcase__media-link">
-          <Image {...previewProps} />
-        </a>
-      ) : (
-        <Image {...previewProps} />
-      )
-    }
+  <div
+    class="showcase__media"
+    data-gallery
+    style={previewPosition ? `--pos:${previewPosition}` : undefined}
+  >
+    <Image {...previewProps} />
     {
       thumbs.length > 0 && (
         <ul class="thumbs" aria-label={`Скриншоты проекта ${title}`}>
@@ -67,6 +74,7 @@ const previewProps = {
                 class="thumb"
                 data-full={fulls[i].src}
                 aria-label={`Показать скриншот ${i + 1}`}
+                aria-current={i === 0 ? 'true' : undefined}
               >
                 <Image src={t} alt="" width={156} height={112} loading="lazy" />
               </button>
@@ -83,13 +91,14 @@ const previewProps = {
         <CtaTag
           class:list={['cta', `cta--${cta}`, { 'cta--static': !href }]}
           href={href}
-          aria-label={href ? `Открыть проект: ${title}` : undefined}
+          {...linkProps}
+          aria-label={ctaLabel}
           aria-hidden={href ? undefined : 'true'}
         >
           <span class="cta__circle">
-            <Icon name={cta === 'more' ? 'arrow-up-right' : 'arrow-right'} />
+            <Icon name="arrow-right" />
           </span>
-          {cta === 'more' && <span class="cta__label">Подробнее</span>}
+          {href && <span class="cta__label">{ctaText}</span>}
         </CtaTag>
       )
     }
@@ -100,7 +109,13 @@ const previewProps = {
         <span class="meta__tag">{tag}</span>
       </div>
       <h3 class="info__title">
-        {href ? <a href={href}>{title}</a> : title}
+        {href ? (
+          <a href={href} {...linkProps}>
+            {title}
+          </a>
+        ) : (
+          title
+        )}
       </h3>
       <p class="info__desc">{description}</p>
     </div>
@@ -108,6 +123,24 @@ const previewProps = {
 </article>
 
 <script>
+  // Планшет (768–1100px): нет наведения, поэтому подпись у кнопки раскрывается по тапу;
+  // повторный тап (или тап по заголовку) открывает проект. Тап вне кнопки закрывает подпись.
+  // На мобильном (≤767px) подпись видна всегда, кнопка открывает проект сразу.
+  const touchLayout = window.matchMedia('(min-width: 768px) and (max-width: 1100px)');
+  const ctas = document.querySelectorAll<HTMLAnchorElement>('a.cta');
+  ctas.forEach((cta) =>
+    cta.addEventListener('click', (e) => {
+      if (!touchLayout.matches || cta.classList.contains('is-open')) return;
+      e.preventDefault();
+      ctas.forEach((c) => c.classList.remove('is-open'));
+      cta.classList.add('is-open');
+    }),
+  );
+  document.addEventListener('click', (e) => {
+    if (!(e.target as Element).closest('a.cta')) ctas.forEach((c) => c.classList.remove('is-open'));
+  });
+  touchLayout.addEventListener('change', () => ctas.forEach((c) => c.classList.remove('is-open')));
+
   document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((gallery) => {
     const main = gallery.querySelector<HTMLImageElement>('[data-main]');
     const buttons = Array.from(gallery.querySelectorAll<HTMLButtonElement>('.thumb'));
@@ -146,19 +179,26 @@ const previewProps = {
   /* Превью */
   .showcase__media {
     position: relative;
-    aspect-ratio: 1012 / 534;
+    min-width: 0;
     border-radius: var(--r-preview);
     overflow: hidden;
     background: #eee9fb;
+    container-type: inline-size;
   }
-  .showcase__media-link {
+  /* Пропорции 1012:534 — минимальная высота; если текст карточки выше, превью растягивается по строке сетки
+     (aspect-ratio тут не годится: при растяжении он расширял бы превью за пределы колонки) */
+  .showcase__media::before {
+    content: '';
     display: block;
-    height: 100%;
+    padding-top: calc(534 / 1012 * 100%);
   }
   .showcase__media :global(.showcase__img) {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: var(--pos, 50% 50%);
   }
   .thumbs {
     position: absolute;
@@ -172,7 +212,8 @@ const previewProps = {
   }
   .thumb {
     display: block;
-    width: clamp(48px, 4.5vw, 78px);
+    /* единый размер у всех карточек (не зависит от числа миниатюр); растёт вместе с превью */
+    width: clamp(32px, 7cqw, 72px);
     aspect-ratio: 78 / 56;
     border: 1px solid var(--c-border-thumb);
     border-radius: var(--r-thumb);
@@ -187,10 +228,15 @@ const previewProps = {
     height: 100%;
     object-fit: cover;
   }
-  .thumb:hover,
   .thumb[aria-current='true'] {
     border-color: var(--c-accent);
     transform: translateY(-2px);
+  }
+  @media (min-width: 1101px) and (hover: hover) {
+    .thumb:hover {
+      border-color: var(--c-accent);
+      transform: translateY(-2px);
+    }
   }
 
   /* Карточка */
@@ -211,11 +257,51 @@ const previewProps = {
   }
   .cta {
     display: inline-flex;
+    flex-direction: row-reverse; /* карточка справа от превью: надпись выезжает влево от кнопки */
     align-items: center;
-    gap: 12px;
     color: var(--c-accent);
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
+  }
+  .showcase--mirrored .cta {
+    flex-direction: row; /* карточка слева: надпись выезжает вправо */
+  }
+  .cta__label {
+    display: flex;
+    align-items: center;
+    height: 72px;
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    opacity: 0;
+    transition:
+      max-width 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      margin 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.25s ease;
+  }
+  /* Надпись выезжает: на десктопе при наведении, на планшете/мобильном — по клику (класс is-open),
+     с клавиатуры — при фокусе */
+  a.cta:focus-visible .cta__label,
+  a.cta.is-open .cta__label {
+    max-width: 280px;
+    margin-inline-end: 20px; /* row-reverse: надпись слева от кнопки */
+    opacity: 1;
+  }
+  .showcase--mirrored a.cta:focus-visible .cta__label,
+  .showcase--mirrored a.cta.is-open .cta__label {
+    margin-inline-end: 0;
+    margin-inline-start: 20px;
+  }
+  @media (min-width: 1101px) and (hover: hover) {
+    a.cta:hover .cta__label {
+      max-width: 280px;
+      margin-inline-end: 20px;
+      opacity: 1;
+    }
+    .showcase--mirrored a.cta:hover .cta__label {
+      margin-inline-end: 0;
+      margin-inline-start: 20px;
+    }
   }
   .cta__circle {
     display: grid;
@@ -229,9 +315,24 @@ const previewProps = {
       transform 0.2s ease,
       box-shadow 0.2s ease;
   }
-  a.cta:hover .cta__circle {
-    transform: translateX(4px);
+  .cta__circle :global(svg) {
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  a.cta:focus-visible .cta__circle,
+  a.cta.is-open .cta__circle {
     box-shadow: var(--shadow-btn);
+  }
+  a.cta:focus-visible .cta__circle :global(svg),
+  a.cta.is-open .cta__circle :global(svg) {
+    transform: rotate(-45deg); /* стрелка → превращается в ↗ */
+  }
+  @media (min-width: 1101px) and (hover: hover) {
+    a.cta:hover .cta__circle {
+      box-shadow: var(--shadow-btn);
+    }
+    a.cta:hover .cta__circle :global(svg) {
+      transform: rotate(-45deg);
+    }
   }
   .cta--static {
     cursor: default;
@@ -251,6 +352,7 @@ const previewProps = {
     color: var(--c-accent);
     font-size: var(--fs-caption);
     font-weight: 600;
+    text-transform: uppercase;
   }
   .meta__dot {
     width: 4px;
@@ -271,8 +373,10 @@ const previewProps = {
     line-height: 1.15;
     letter-spacing: -0.04em;
   }
-  .info__title a:hover {
-    color: var(--c-accent);
+  @media (min-width: 1101px) and (hover: hover) {
+    .info__title a:hover {
+      color: var(--c-accent);
+    }
   }
   .info__desc {
     color: var(--c-text-2);
@@ -301,17 +405,72 @@ const previewProps = {
       padding-inline: 0;
       gap: 24px;
     }
+    .cta,
+    .showcase--mirrored .cta {
+      flex-direction: row;
+    }
     .cta__circle {
       width: 60px;
       height: 60px;
+    }
+    .cta__label {
+      height: 60px;
+    }
+    a.cta:focus-visible .cta__label,
+    a.cta.is-open .cta__label,
+    .showcase--mirrored a.cta:focus-visible .cta__label,
+    .showcase--mirrored a.cta.is-open .cta__label {
+      margin-inline: 16px 0;
     }
   }
   @media (max-width: 767px) {
     .meta__tag {
       padding: 10px 18px;
     }
+
+    /* Миниатюры — крупные (по пальцу), на прежнем месте поверх превью справа внизу;
+       если не помещаются в ширину — лента листается свайпом */
     .thumbs {
-      gap: 6px;
+      inset: auto 2.7% 4.3% 2.7%;
+      gap: 8px;
+      padding: 3px 0;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .thumbs li:first-child {
+      margin-inline-start: auto; /* прижимает ленту вправо, но не мешает прокрутке */
+    }
+    .thumbs::-webkit-scrollbar {
+      display: none;
+    }
+    .thumbs li {
+      flex: 0 0 auto;
+    }
+    .thumb {
+      width: 64px;
+    }
+
+    /* Кнопка у правого края, подпись видна всегда; стрелка уже повёрнута ↗ */
+    .showcase__card,
+    .showcase--mirrored .showcase__card {
+      align-items: stretch;
+    }
+    .cta,
+    .showcase--mirrored .cta {
+      flex-direction: row-reverse;
+      align-self: flex-end;
+    }
+    a.cta .cta__label,
+    a.cta:focus-visible .cta__label,
+    .showcase--mirrored a.cta .cta__label,
+    .showcase--mirrored a.cta:focus-visible .cta__label {
+      max-width: none;
+      margin-inline: 0 16px;
+      opacity: 1;
+    }
+    a.cta .cta__circle :global(svg) {
+      transform: rotate(-45deg);
     }
   }
 </style>

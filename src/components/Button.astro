@@ -4,7 +4,8 @@ interface Props {
   href?: string;
   variant?: 'primary' | 'secondary';
   class?: string;
-  download?: boolean;
+  /** true — скачивание под исходным именем; строка — имя сохраняемого файла. */
+  download?: boolean | string;
 }
 const { href, variant = 'primary', class: className, download, ...rest } = Astro.props;
 const Tag = href ? 'a' : 'button';
@@ -13,7 +14,7 @@ const Tag = href ? 'a' : 'button';
 <Tag
   class:list={['btn', `btn--${variant}`, className]}
   href={href}
-  download={download ? '' : undefined}
+  download={download ? (download === true ? '' : download) : undefined}
   type={href ? undefined : 'button'}
   {...rest}
 >

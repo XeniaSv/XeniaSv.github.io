@@ -28,10 +28,10 @@ const { items } = Astro.props;
               <Image
                 src={item.preview}
                 alt=""
-                width={640}
-                height={360}
-                widths={[320, 480, 640]}
-                sizes="(max-width: 767px) 100vw, 33vw"
+                width={560}
+                height={315}
+                widths={[280, 420, 560]}
+                sizes="(max-width: 767px) 100vw, 280px"
                 loading="lazy"
               />
               <span class="related__meta">{item.tag}</span>
@@ -59,8 +59,8 @@ const { items } = Astro.props;
   }
   .related__list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 280px));
+    gap: 24px 20px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -73,6 +73,7 @@ const { items } = Astro.props;
   }
   .related__card :global(img) {
     width: 100%;
+    height: auto;
     aspect-ratio: 16 / 9;
     object-fit: cover;
     margin-bottom: 8px;
@@ -89,7 +90,7 @@ const { items } = Astro.props;
     text-transform: uppercase;
   }
   .related__name {
-    font-size: var(--fs-h2);
+    font-size: var(--fs-lead);
     font-weight: 500;
     line-height: 1.15;
     letter-spacing: -0.04em;
@@ -97,5 +98,27 @@ const { items } = Astro.props;
   }
   .related__card:hover .related__name {
     color: var(--c-accent);
+  }
+  /* Мобильный: горизонтальный слайдер со снапом; следующая карточка выглядывает, подсказывая свайп */
+  @media (max-width: 767px) {
+    .related__list {
+      display: flex;
+      gap: 16px;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      scrollbar-width: none; /* без полосы прокрутки — листается свайпом */
+      -webkit-overflow-scrolling: touch;
+    }
+    .related__list::-webkit-scrollbar {
+      display: none;
+    }
+    .related__list li {
+      flex: 0 0 min(78%, 300px);
+      scroll-snap-align: start;
+    }
   }
 </style>

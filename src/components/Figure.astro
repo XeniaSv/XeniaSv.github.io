@@ -6,11 +6,14 @@ import type { ImageMetadata } from 'astro';
 interface Props {
   src: ImageMetadata;
   alt: string;
-  /** cover — как в макете по умолчанию; contain — если нельзя обрезать. */
-  fit?: 'cover' | 'contain';
+  /**
+   * natural — картинка целиком в своих пропорциях (по умолчанию: слайды 16:9 нельзя обрезать);
+   * cover / contain — рамка 883×430 как в макете, с обрезкой / со вписыванием.
+   */
+  fit?: 'natural' | 'cover' | 'contain';
   caption?: string;
 }
-const { src, alt, fit = 'cover', caption } = Astro.props;
+const { src, alt, fit = 'natural', caption } = Astro.props;
 ---
 
 <figure class:list={['figure', `figure--${fit}`]}>
@@ -30,8 +33,11 @@ const { src, alt, fit = 'cover', caption } = Astro.props;
   }
   .figure :global(img) {
     width: 100%;
-    aspect-ratio: 883 / 430;
     height: auto;
+  }
+  .figure--cover :global(img),
+  .figure--contain :global(img) {
+    aspect-ratio: 883 / 430;
     object-fit: cover;
     background: #f5f2fd;
   }

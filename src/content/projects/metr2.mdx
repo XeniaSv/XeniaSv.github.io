@@ -2,23 +2,28 @@
 title: Метр квадратный. Создание универсальной страницы для услуг
 shortTitle: Метр квадратный. Универсальная страница для услуг
 cardTitle: Метр квадратный
-category: НЕДВИЖИМОСТЬ
+category: ПРОПТЕХ
 tag: Веб-сервис
-description: "Универсальная страница для услуг «Проверка недвижимости» и «Защита сделки» с чат-ботом, который доносит ценностное предложение для покупателей."
-preview: ../../assets/projects/metr2/lead.jpg
+description: "Создание универсальной страницы для Проверки недвижимости и Защиты сделки"
+preview: ../../assets/projects/metr2/preview.jpg
 lead: ../../assets/projects/metr2/lead.jpg
-leadCrop: { width: 201.58, left: -101.6, top: -19.54 }
 order: 2
 ---
 
 import Figure from '../../components/Figure.astro';
-import placeholder from '../../assets/shared/placeholder-figure.jpg';
+import Video from '../../components/Video.astro';
+import fig1 from '../../assets/projects/metr2/fig-1.jpg';
+import fig2 from '../../assets/projects/metr2/fig-2.jpg';
+import fig3 from '../../assets/projects/metr2/fig-3.jpg';
+import chatBot from '../../assets/projects/metr2/chat-bot.mp4';
+import freeConsultation from '../../assets/projects/metr2/free-consultation.mp4';
+import termsExplanation from '../../assets/projects/metr2/terms-explanation.mp4';
 
 ## Цель
 
 Создать универсальную страницу/интерфейс для “Проверка недвижимости” и “Защита сделки”, которая донесёт ценностное предложение для покупателей
 
-<Figure src={placeholder} alt="Универсальная страница для услуг" />
+<Figure src={fig1} alt="Универсальная страница для услуг: десктопная версия" />
 
 ## Задачи
 
@@ -27,7 +32,7 @@ import placeholder from '../../assets/shared/placeholder-figure.jpg';
 - У интерфейса должна быть простая навигация
 - Читабельная стоимость услуг и важно, чтобы на страницах была раскрыта ценность услуги
 
-<Figure src={placeholder} alt="Страница услуги" />
+<Figure src={fig2} alt="Блоки отзывов и записи на консультацию" />
 
 ## Порядок задач
 
@@ -41,19 +46,19 @@ import placeholder from '../../assets/shared/placeholder-figure.jpg';
 
 Первое что я реализовала, это чат бот. Можно начать диалог сразу и тогда появиться всплывающее окно с ботом, в котором можно написать свой запрос или выбрать интересующий из предложенных. Если же пользователь закрывает сообщение, то он всегда может перейти на диалог просто нажав на кота.
 
-<Figure src={placeholder} alt="Чат-бот" />
+<Video src={chatBot} label="Диалог с чат-ботом на странице услуги" />
 
 ## Дизайн-решение «Бесплатная консультация»
 
 Также был добавлен блок о том, что бот предлагает воспользоваться бесплатной консультацией.
 
-<Figure src={placeholder} alt="Блок бесплатной консультации" />
+<Video src={freeConsultation} label="Бот предлагает бесплатную консультацию" />
 
 ## Дизайн-решение «Объяснение терминов»
 
 И ещё важное нововведение - это объяснение ботом некоторых терминов, которые могут быть непонятны клиенту и избежать которых сложно. Бот выдаёт объяснение этих терминов. Также об этом можно спросить будет непосредственно в диалоге с ботом.
 
-<Figure src={placeholder} alt="Объяснение терминов ботом" />
+<Video src={termsExplanation} label="Бот объясняет непонятные термины" />
 
 ## Мобильная версия
 
@@ -61,4 +66,4 @@ import placeholder from '../../assets/shared/placeholder-figure.jpg';
 
 Все элементы интерфейса оптимизированы для небольших экранов: тексты компактные, кнопки крупные, а отступы увеличены для комфортного взаимодействия.
 
-<Figure src={placeholder} alt="Мобильная версия" />
+<Figure src={fig3} alt="Мобильная версия страницы услуги" />

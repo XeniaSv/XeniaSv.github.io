@@ -1,0 +1,85 @@
+---
+/**
+ * Короткая запись экрана в теле статьи (в MDX: `<Video src={clip} label="…" />`, где
+ * `import clip from '…/clip.mp4'`). Без звука; играет, пока видна на экране (если пользователь
+ * не просил уменьшить анимацию), нативные controls оставляют возможность поставить на паузу.
+ */
+interface Props {
+  /** URL файла (импорт .mp4 из src/assets). */
+  src: string;
+  /** Описание для скринридеров (aria-label). */
+  label: string;
+  /** Размер кадра — задаёт пропорции до загрузки видео, чтобы страница не прыгала. */
+  width?: number;
+  height?: number;
+  caption?: string;
+}
+const { src, label, width = 1280, height = 720, caption } = Astro.props;
+---
+
+<figure class="video">
+  <video
+    src={src}
+    aria-label={label}
+    width={width}
+    height={height}
+    muted
+    loop
+    playsinline
+    controls
+    controlslist="nodownload noremoteplayback"
+    preload="metadata"
+    data-autoplay
+  >
+  </video>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<script>
+  const clips = document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduceMotion && 'IntersectionObserver' in window) {
+    clips.forEach((v) => {
+      let auto = false; // старт/пауза инициированы нами, а не пользователем
+      let userPaused = false;
+      v.addEventListener('pause', () => {
+        if (auto) auto = false;
+        else userPaused = true;
+      });
+      v.addEventListener('play', () => {
+        if (auto) auto = false;
+        else userPaused = false;
+      });
+      new IntersectionObserver(
+        ([e]) => {
+          if (e.isIntersecting && v.paused && !userPaused) {
+            auto = true;
+            v.play().catch(() => (auto = false));
+          } else if (!e.isIntersecting && !v.paused) {
+            auto = true;
+            v.pause();
+          }
+        },
+        { threshold: 0.4 },
+      ).observe(v);
+    });
+  }
+</script>
+
+<style>
+  .video {
+    width: 100%;
+  }
+  .video video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    background: #f5f2fd;
+  }
+  figcaption {
+    margin-top: 12px;
+    color: var(--c-text-2);
+    font-size: var(--fs-small);
+  }
+</style>

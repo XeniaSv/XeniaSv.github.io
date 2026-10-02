@@ -6,7 +6,7 @@ import SectionLabel from '../components/SectionLabel.astro';
 import ProjectShowcase from '../components/ProjectShowcase.astro';
 import ScrollTop from '../components/ScrollTop.astro';
 import { site } from '../config/site';
-import { homeSections } from '../data/home';
+import { homeSections, workGallery } from '../data/home';
 import { url } from '../lib/url';
 import HeroBackground from '../components/HeroBackground.astro';
 
@@ -16,19 +16,33 @@ const bySlug = new Map(projects.map((p) => [p.id, p]));
 /** Превращает запись из data/home.ts в props для ProjectShowcase. */
 const sections = homeSections.map((section) => ({
   ...section,
-  cards: section.cards.map((card) => {
-    if (!card.project) return card;
+  cards: section.cards.map((card, i) => {
+    // карточки в секции чередуются; `mirrored` у карточки перекрывает это
+    const mirrored = card.mirrored ?? (i % 2 === 1) !== Boolean(section.startMirrored);
+    if (!card.project) {
+      const images = card.gallery ? workGallery(card.gallery) : [];
+      if (images.length === 0) throw new Error(`home.ts: у карточки «${card.title}» нет ни project, ни gallery`);
+      return {
+        ...card,
+        mirrored,
+        preview: images[0],
+        thumbs: images.length > 1 ? images : [],
+        external: Boolean(card.href && /^https?:/.test(card.href)),
+      };
+    }
     const entry = bySlug.get(card.project);
     if (!entry) throw new Error(`home.ts: проект «${card.project}» не найден в src/content/projects`);
     const d = entry.data;
     return {
       ...card,
+      mirrored,
       title: card.title ?? d.cardTitle ?? d.shortTitle ?? d.title.replace(/\n/g, ' '),
       category: card.category ?? d.category,
       tag: card.tag ?? d.tag,
       description: card.description ?? d.description,
-      preview: card.preview ?? d.preview,
-      thumbs: card.thumbs ?? d.thumbs,
+      preview: d.preview,
+      thumbs: d.thumbs,
+      external: false,
       href: url(`/projects/${entry.id}/`),
     };
   }),
@@ -52,7 +66,11 @@ const sections = homeSections.map((section) => ({
           </div>
           <div class="hero__cta">
             <Button href={site.hero.primaryCta.href}>{site.hero.primaryCta.label}</Button>
-            <Button href={url(site.hero.secondaryCta.href)} variant="secondary" download>
+            <Button
+              href={url(site.hero.secondaryCta.href)}
+              variant="secondary"
+              download={site.hero.secondaryCta.fileName}
+            >
               {site.hero.secondaryCta.label}
             </Button>
           </div>
@@ -74,9 +92,13 @@ const sections = homeSections.map((section) => ({
                   description={card.description!}
                   preview={card.preview!}
                   thumbs={card.thumbs}
-                  href={'href' in card ? (card.href as string) : undefined}
+                  href={card.href}
+                  external={'external' in card ? card.external : false}
+                  linkLabel={card.linkLabel}
+                  previewPosition={card.previewPosition}
                   mirrored={card.mirrored}
                   cta={card.cta}
+                  ctaText={card.ctaText}
                   eager={sIdx === 0 && cIdx === 0}
                 />
               ))}
@@ -178,8 +200,7 @@ const sections = homeSections.map((section) => ({
 
   /* Нижний блок с кнопкой «наверх» */
   .tail {
-    margin-top: calc(var(--space-section) * 0.75);
-    padding-block: clamp(120px, 20vw, 340px) clamp(32px, 4.6vw, 80px);
+    padding-block: 100px clamp(32px, 4.6vw, 80px); /* 100px от последнего кейса до кнопки «наверх» */
   }
 
   @media (max-width: 1100px) {

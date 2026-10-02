@@ -13,7 +13,7 @@ export const site = {
     description:
       'Специализируюсь на коммерческих веб-проектах: лендинги, e-commerce, корпоративные сайты. Создаю дизайн-системы, активно использую нейросети в рабочем процессе. Превращаю сложные бизнес-задачи в понятные и удобные интерфейсы.',
     primaryCta: { label: 'Смотреть работы', href: '#realized' },
-    secondaryCta: { label: 'Скачать резюме', href: '/resume.pdf' }, // TODO: положить настоящее резюме в public/resume.pdf
+    secondaryCta: { label: 'Скачать резюме', href: '/resume.pdf', fileName: 'Насибуллина Ксения Андреевна.pdf' }, // файл — public/resume.pdf
   },
   /** Ссылки навигации; `hash` — id секции на главной. */
   nav: [
@@ -23,8 +23,8 @@ export const site = {
     { label: 'Учебные работы', hash: 'learning' },
   ],
   contacts: [
-    { id: 'max', label: 'MAX', href: 'https://max.ru/' }, // TODO: ссылка на профиль в MAX
-    { id: 'telegram', label: 'Telegram', href: 'https://t.me/' }, // TODO: ссылка на Telegram
-    { id: 'email', label: 'Email', href: 'mailto:hello@example.com' }, // TODO: реальный email
+    { id: 'max', label: 'MAX', href: 'https://max.ru/u/f9LHodD0cOKKI91RF6hI8-vI6gqp6lwiut9yYl77vnwyIVubnQcxQ8qv_x8' },
+    { id: 'telegram', label: 'Telegram', href: 'https://t.me/XeniaNas' },
+    { id: 'email', label: 'Email', href: 'mailto:xenia.nasibullina@mail.ru' },
   ],
 } as const;

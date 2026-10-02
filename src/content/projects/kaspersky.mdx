@@ -2,12 +2,11 @@
 title: "Kaspersky.\nКастомизация главного экрана"
 shortTitle: Kaspersky. Кастомизация главного экрана
 cardTitle: Kaspersky
-category: КИБЕРБЕЗОПАСНОСТЬ
-tag: Мобильное приложение
-description: "Возможность персонализировать главный экран: добавлять, удалять и менять порядок функций, использовать готовые шаблоны."
-preview: ../../assets/projects/kaspersky/lead.jpg
+category: КИБЕРБЕЗ
+tag: Hi-fi прототип
+description: "Кастомизация Главного экрана"
+preview: ../../assets/projects/kaspersky/preview.jpg
 lead: ../../assets/projects/kaspersky/lead.jpg
-leadCrop: { width: 176.09, left: 0.07, top: -9.52 }
 leadLogo:
   src: ../../assets/projects/kaspersky/logo.svg
   alt: Kaspersky
@@ -18,7 +17,13 @@ order: 4
 ---
 
 import Figure from '../../components/Figure.astro';
-import placeholder from '../../assets/shared/placeholder-figure.jpg';
+import Video from '../../components/Video.astro';
+import fig1 from '../../assets/projects/kaspersky/fig-1.jpg';
+import fig2 from '../../assets/projects/kaspersky/fig-2.jpg';
+import fig3 from '../../assets/projects/kaspersky/fig-3.jpg';
+import fig4 from '../../assets/projects/kaspersky/fig-4.jpg';
+import editMode from '../../assets/projects/kaspersky/edit-mode.mp4';
+import customization from '../../assets/projects/kaspersky/customization.mp4';
 
 ## Задача
 
@@ -28,7 +33,7 @@ import placeholder from '../../assets/shared/placeholder-figure.jpg';
 
 Минусы: Сложноват для новичков, нет персонализации экрана
 
-<Figure src={placeholder} alt="Главный экран Kaspersky" />
+<Figure src={fig1} alt="Главный экран Kaspersky" />
 
 ## Ключевые проблемы и влияние на метрики
 
@@ -41,23 +46,21 @@ import placeholder from '../../assets/shared/placeholder-figure.jpg';
 
 ## Дизайн-решение
 
-<Figure src={placeholder} alt="Выбор шаблона главного экрана" />
-
 Есть 2 варианта: выбрать готовый шаблон или создать свой. Далее называем шаблон и переходим в режим редактирования.
 
-<Figure src={placeholder} alt="Создание шаблона" />
+<Figure src={fig2} alt="Выбор шаблона главного экрана и название нового шаблона" />
 
 ### Режим редактирования
 
 Было решено полностью повторить вид главной страницы, чтобы пользователь понимал, как примерно будет выглядеть расположение элементов. Карточки с советами убирать нельзя, поэтому было принято решение сделать их неактивными.
 
-<Figure src={placeholder} alt="Режим редактирования" />
+<Figure src={fig3} alt="Режим редактирования главного экрана" />
+
+<Video src={editMode} label="Запись экрана: режим редактирования главного экрана" />
 
 ### Добавление функций
 
 Зелёным представлены функции, которые уже есть на странице, а серым те, что можно добавить. Можно удалить один элемент прям здесь, нажав на крестик. А добавить нажать на нужную функцию.
-
-<Figure src={placeholder} alt="Добавление функций" />
 
 ### Варианты кастомизации
 
@@ -65,10 +68,10 @@ import placeholder from '../../assets/shared/placeholder-figure.jpg';
 - Перемещать виджеты для выставления приоритетности
 - Увеличивать и уменьшать ширину виджета, нажав на соответствующую кнопку и с помощью стрелочек увеличить или уменьшить элемент соответственно
 
-<Figure src={placeholder} alt="Варианты кастомизации" />
+<Video src={customization} label="Запись экрана: варианты кастомизации виджетов" />
 
 ### Готовый шаблон
 
 Для разных сценариев: геймерам, семьям. Это сэкономит время и снизит стресс от настройки
 
-<Figure src={placeholder} alt="Готовые шаблоны" />
+<Figure src={fig4} alt="Готовые шаблоны главного экрана" />

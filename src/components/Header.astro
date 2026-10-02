@@ -95,12 +95,22 @@ const home = url('/');
     padding: 24px 32px;
     border: 1px solid var(--c-border-nav);
     border-radius: var(--r-pill);
+    isolation: isolate;
+  }
+  /* Фон и блюр капсулы — в псевдоэлементе: backdrop-filter на самой капсуле делал её «корнем фона»,
+     и выпадающее меню внутри неё не могло размывать страницу позади себя */
+  .capsule::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
     background: var(--c-nav-bg);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     transition: background-color 0.25s ease;
   }
-  .is-scrolled .capsule {
+  .is-scrolled .capsule::before {
     background: rgba(255, 255, 255, 0.82);
   }
   .nav-links {
@@ -128,10 +138,16 @@ const home = url('/');
     place-items: center;
     width: 24px;
     height: 24px;
-    transition: transform 0.2s ease;
+    color: var(--c-ink);
   }
-  .social:hover {
-    transform: scale(1.12);
+  /* Иконки из Figma залиты цветом текста (#100224) — отдаём заливку в currentColor, чтобы красить как пункты меню */
+  .social :global([fill='#100224']) {
+    fill: currentColor;
+    transition: fill 0.2s ease;
+  }
+  .social:hover,
+  .social:focus-visible {
+    color: var(--c-accent);
   }
   .social :global(svg) {
     max-width: 100%;
@@ -203,9 +219,9 @@ const home = url('/');
       padding: 12px;
       border: 1px solid var(--c-border-nav);
       border-radius: 28px;
-      background: rgba(255, 255, 255, 0.92);
-      -webkit-backdrop-filter: blur(16px);
-      backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.7);
+      -webkit-backdrop-filter: blur(28px) saturate(1.2);
+      backdrop-filter: blur(28px) saturate(1.2);
       box-shadow: 0 16px 40px rgba(16, 2, 36, 0.12);
     }
     .is-open .nav-links {

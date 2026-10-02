@@ -9,7 +9,7 @@
 - [Astro](https://astro.build) 7 (`output: 'static'`) + MDX для текстов проектов
 - Чистый CSS с токенами (`src/styles/tokens.css`), без CSS-фреймворков
 - Шрифт Inter (самохостинг, `@fontsource-variable/inter`)
-- Минимум JS: бургер-меню, галерея миниатюр, подсветка раздела в оглавлении
+- Минимум JS: бургер-меню, галерея миниатюр, подсветка раздела в оглавлении, автозапуск видео в кадре
 - Деплой: GitHub Actions → GitHub Pages
 
 ## Быстрый старт
@@ -29,7 +29,7 @@ npm run check:links  # проверка внутренних ссылок и а�
 ```
 src/
   config/site.ts          имя, тексты hero, навигация, контакты, ссылка на резюме
-  data/home.ts            секции и карточки главной страницы
+  data/home.ts            секции и карточки главной страницы (тексты, ссылки на сайты, папки с картинками)
   content/projects/*.mdx  один файл = одна страница проекта (frontmatter + текст статьи)
   content.config.ts       схема frontmatter проектов (zod)
   layouts/                BaseLayout, ProjectLayout (шаблон детальной страницы)
@@ -37,7 +37,8 @@ src/
   pages/index.astro       главная
   pages/projects/[slug].astro  генерирует /projects/<slug>/ из коллекции projects
   styles/                 tokens.css, global.css
-  assets/                 картинки (оптимизируются Astro при сборке)
+  assets/                 картинки и видео (картинки оптимизируются Astro при сборке):
+                          works/ — карточки главной, projects/<slug>/ — детальные страницы
 public/                   favicon, resume.pdf, .nojekyll
 docs/                     ADD_PROJECT.md, DESIGN_TOKENS.md, TODO.md
 ```

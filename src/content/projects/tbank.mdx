@@ -4,10 +4,9 @@ shortTitle: ТБанк. Редизайн раздела курса валют
 cardTitle: ТБанк
 category: ФИНТЕХ
 tag: Мобильное приложение
-description: "Редизайн раздела курсов валют: несколько точек входа, курсы драгоценных металлов и обмен валюты на одной странице."
-preview: ../../assets/projects/tbank/lead.jpg
+description: "Редизайн раздела курсов валют"
+preview: ../../assets/projects/tbank/preview.jpg
 lead: ../../assets/projects/tbank/lead.jpg
-leadCrop: { width: 187.26, left: -87.26, top: -13.57 }
 leadLogo:
   src: ../../assets/projects/tbank/logo.svg
   alt: ТБанк
@@ -18,13 +17,17 @@ order: 3
 ---
 
 import Figure from '../../components/Figure.astro';
-import placeholder from '../../assets/shared/placeholder-figure.jpg';
+import fig1 from '../../assets/projects/tbank/fig-1.jpg';
+import fig2 from '../../assets/projects/tbank/fig-2.jpg';
+import fig3 from '../../assets/projects/tbank/fig-3.jpg';
+import fig4 from '../../assets/projects/tbank/fig-4.jpg';
+import fig5 from '../../assets/projects/tbank/fig-5.jpg';
 
 ## Цель
 
 Сделать раздел курсов валют удобным для клиентов. Чтобы они могли быстро и беспрепятственно совершать действия с валютой.
 
-<Figure src={placeholder} alt="Раздел курсов валют" />
+<Figure src={fig1} alt="Схема сценария и раздел курсов валют в приложении" />
 
 ## Задачи
 
@@ -48,18 +51,18 @@ import placeholder from '../../assets/shared/placeholder-figure.jpg';
 
 **1 точка входа:** На главной странице добавила блок с популярными валютами
 
-<Figure src={placeholder} alt="Блок с популярными валютами на главной" />
+<Figure src={fig2} alt="Блок с популярными валютами на главной и переход к курсам" />
 
 **2 точка входа:** Во вкладке “Город”, в функционале путешествия, т.к. при планировании путешествия пользователю понадобиться поменять валюту
 
-<Figure src={placeholder} alt="Точка входа во вкладке «Город»" />
+<Figure src={fig3} alt="Точка входа во вкладке «Город»" />
 
 - Нужный курс, по какому будет происходить обмен, подсвечивается обводкой
 - Реализовала небольшие блоки с графиком из ТИнвестиции , если пользователь больше хочет купить валюту в качестве инвестиции
 - Визуально изменила информацию о том, какие операции возможны по какому курсу
 - Появление вкладки с драгметаллами, теперь валюты и металлы находятся в одном месте, переключение происходят по табам
 
-<Figure src={placeholder} alt="Вкладка с драгоценными металлами" />
+<Figure src={fig4} alt="Курсы валют и вкладка с драгоценными металлами" />
 
 Теперь перевод происходит на одной странице
 
@@ -67,4 +70,4 @@ import placeholder from '../../assets/shared/placeholder-figure.jpg';
 
 Добавлены chips с выбранными значениями, например, вся сумма на счету, до круглой суммы на счету и самая частая транзакция.
 
-<Figure src={placeholder} alt="Обмен валюты на одной странице" />
+<Figure src={fig5} alt="Обмен валюты на одной странице" />
