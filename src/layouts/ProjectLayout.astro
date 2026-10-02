@@ -28,7 +28,7 @@ const { title, shortTitle, description, lead, leadCrop, leadLogo, toc, related }
   <main>
     <section class="p-hero bg-hero">
       <div class="container p-hero__inner">
-        <div class="p-hero__text">
+        <div class="p-hero__text" data-reveal>
           <nav class="crumbs" aria-label="Хлебные крошки">
             <a href={url('/')}>Главная</a>
             <span class="crumbs__sep" aria-hidden="true">/</span>
@@ -37,7 +37,7 @@ const { title, shortTitle, description, lead, leadCrop, leadLogo, toc, related }
           <h1 class="p-hero__title">{title}</h1>
         </div>
 
-        <div class="lead">
+        <div class="lead" data-reveal style="--reveal-delay: 0.12s">
           <Image
             class="lead__img"
             src={lead}

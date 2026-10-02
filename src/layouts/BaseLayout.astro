@@ -19,6 +19,9 @@ const ogImage = new URL(url('/og-image.jpg'), Astro.site);
 <html lang="ru">
   <head>
     <meta charset="utf-8" />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -43,5 +46,39 @@ const ogImage = new URL(url('/og-image.jpg'), Astro.site);
   <body id="top">
     <Header />
     <slot />
+    <script>
+      // Базовая анимация появления: [data-reveal] и дети статьи (.prose > *) показываются, когда доходят
+      // до нижней части экрана. Проверка по скроллу (а не IntersectionObserver), чтобы элементы, оставшиеся
+      // выше экрана после перехода по якорю, тоже показывались.
+      let pending = [
+        ...document.querySelectorAll<HTMLElement>('[data-reveal]'),
+        ...document.querySelectorAll<HTMLElement>('.prose > *'),
+      ];
+      pending.forEach((el) => el.setAttribute('data-reveal', ''));
+      let queued = false;
+      const check = () => {
+        queued = false;
+        const edge = window.innerHeight * 0.92;
+        pending = pending.filter((el) => {
+          if (el.getBoundingClientRect().top >= edge) return true;
+          el.classList.add('is-revealed');
+          return false;
+        });
+        if (pending.length === 0) {
+          window.removeEventListener('scroll', schedule);
+          window.removeEventListener('resize', schedule);
+        }
+      };
+      const schedule = () => {
+        if (!queued) {
+          queued = true;
+          requestAnimationFrame(check);
+        }
+      };
+      window.addEventListener('scroll', schedule, { passive: true });
+      window.addEventListener('resize', schedule);
+      window.addEventListener('load', schedule);
+      check();
+    </script>
   </body>
 </html>

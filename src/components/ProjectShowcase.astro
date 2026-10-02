@@ -57,7 +57,7 @@ const previewProps = {
 };
 ---
 
-<article class:list={['showcase', { 'showcase--mirrored': mirrored }]}>
+<article class:list={['showcase', { 'showcase--mirrored': mirrored }]} data-reveal>
   <div
     class="showcase__media"
     data-gallery
@@ -389,6 +389,9 @@ const previewProps = {
     }
     .cta__label {
       height: 60px;
+    }
+    .info__desc {
+      margin-top: -4px; /* заголовок → описание ≈ 20px (gap 24 − 4) */
     }
   }
   @media (max-width: 767px) {

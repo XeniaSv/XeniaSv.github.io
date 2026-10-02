@@ -54,10 +54,10 @@ const sections = homeSections.map((section) => ({
     <section class="hero bg-hero">
       <HeroBackground />
       <div class="container hero__inner">
-        <h1 class="hero__name">
+        <h1 class="hero__name" data-reveal style="--reveal-to: 0.6">
           {site.nameLines.map((line) => <span>{line}</span>)}
         </h1>
-        <div class="hero__bottom">
+        <div class="hero__bottom" data-reveal style="--reveal-delay: 0.15s">
           <div class="hero__titles">
             <p class="hero__sub">
               {site.hero.subtitle.map((line) => <span>{line}</span>)}
@@ -218,6 +218,9 @@ const sections = homeSections.map((section) => ({
   }
   @media (max-width: 767px) {
     .hero {
+      /* первый экран — во всю высоту экрана, контент прижат к низу блока */
+      min-height: 100vh;
+      min-height: 100svh;
       padding-top: 120px;
       align-items: flex-end;
     }

@@ -4,7 +4,7 @@ import ScrollTop from './ScrollTop.astro';
 import { url } from '../lib/url';
 ---
 
-<div class="back-bar container">
+<div class="back-bar container" data-reveal>
   <Button href={url('/')} class="back-bar__btn">Вернуться на Главную</Button>
   <ScrollTop class="back-bar__top" />
 </div>
