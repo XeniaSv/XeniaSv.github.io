@@ -123,24 +123,6 @@ const previewProps = {
 </article>
 
 <script>
-  // Планшет (768–1100px): нет наведения, поэтому подпись у кнопки раскрывается по тапу;
-  // повторный тап (или тап по заголовку) открывает проект. Тап вне кнопки закрывает подпись.
-  // На мобильном (≤767px) подпись видна всегда, кнопка открывает проект сразу.
-  const touchLayout = window.matchMedia('(min-width: 768px) and (max-width: 1100px)');
-  const ctas = document.querySelectorAll<HTMLAnchorElement>('a.cta');
-  ctas.forEach((cta) =>
-    cta.addEventListener('click', (e) => {
-      if (!touchLayout.matches || cta.classList.contains('is-open')) return;
-      e.preventDefault();
-      ctas.forEach((c) => c.classList.remove('is-open'));
-      cta.classList.add('is-open');
-    }),
-  );
-  document.addEventListener('click', (e) => {
-    if (!(e.target as Element).closest('a.cta')) ctas.forEach((c) => c.classList.remove('is-open'));
-  });
-  touchLayout.addEventListener('change', () => ctas.forEach((c) => c.classList.remove('is-open')));
-
   document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((gallery) => {
     const main = gallery.querySelector<HTMLImageElement>('[data-main]');
     const buttons = Array.from(gallery.querySelectorAll<HTMLButtonElement>('.thumb'));
@@ -279,16 +261,14 @@ const previewProps = {
       margin 0.4s cubic-bezier(0.22, 1, 0.36, 1),
       opacity 0.25s ease;
   }
-  /* Надпись выезжает: на десктопе при наведении, на планшете/мобильном — по клику (класс is-open),
-     с клавиатуры — при фокусе */
-  a.cta:focus-visible .cta__label,
-  a.cta.is-open .cta__label {
+  /* Надпись выезжает: на десктопе при наведении, с клавиатуры — при фокусе.
+     На планшете и мобильном (≤1100px) она видна всегда — см. медиазапрос ниже */
+  a.cta:focus-visible .cta__label {
     max-width: 280px;
     margin-inline-end: 20px; /* row-reverse: надпись слева от кнопки */
     opacity: 1;
   }
-  .showcase--mirrored a.cta:focus-visible .cta__label,
-  .showcase--mirrored a.cta.is-open .cta__label {
+  .showcase--mirrored a.cta:focus-visible .cta__label {
     margin-inline-end: 0;
     margin-inline-start: 20px;
   }
@@ -318,12 +298,10 @@ const previewProps = {
   .cta__circle :global(svg) {
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  a.cta:focus-visible .cta__circle,
-  a.cta.is-open .cta__circle {
+  a.cta:focus-visible .cta__circle {
     box-shadow: var(--shadow-btn);
   }
-  a.cta:focus-visible .cta__circle :global(svg),
-  a.cta.is-open .cta__circle :global(svg) {
+  a.cta:focus-visible .cta__circle :global(svg) {
     transform: rotate(-45deg); /* стрелка → превращается в ↗ */
   }
   @media (min-width: 1101px) and (hover: hover) {
@@ -405,22 +383,12 @@ const previewProps = {
       padding-inline: 0;
       gap: 24px;
     }
-    .cta,
-    .showcase--mirrored .cta {
-      flex-direction: row;
-    }
     .cta__circle {
       width: 60px;
       height: 60px;
     }
     .cta__label {
       height: 60px;
-    }
-    a.cta:focus-visible .cta__label,
-    a.cta.is-open .cta__label,
-    .showcase--mirrored a.cta:focus-visible .cta__label,
-    .showcase--mirrored a.cta.is-open .cta__label {
-      margin-inline: 16px 0;
     }
   }
   @media (max-width: 767px) {
@@ -450,8 +418,10 @@ const previewProps = {
     .thumb {
       width: 64px;
     }
+  }
 
-    /* Кнопка у правого края, подпись видна всегда; стрелка уже повёрнута ↗ */
+  /* Планшет и мобильный: кнопка у правого края, подпись видна всегда, стрелка уже повёрнута ↗ */
+  @media (max-width: 1100px) {
     .showcase__card,
     .showcase--mirrored .showcase__card {
       align-items: stretch;
